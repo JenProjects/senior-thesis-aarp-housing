@@ -7,7 +7,7 @@ Most of my data was from the Census Bureau (5-year ACS) and other public governm
 Data can be downloaded here:
 [https://drive.google.com/file/d/1bZ3qctcxWiwszHJeobxmhDuFbUAIpRQG/view?usp=sharing]
 
-# Dode 
+# Code 
 Python and Google Colab were used to merge data and run linear regressions. Chatgpt and Claude were used in coding. 
 Code can be seen here: 
 [https://drive.google.com/drive/folders/1vEYXQeelxTtuNhQKNLvk4xh4GswD0A96?usp=sharing]
