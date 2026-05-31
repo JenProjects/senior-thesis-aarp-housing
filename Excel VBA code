@@ -1,7 +1,7 @@
-Parsing through 2000-2009 data; 
+# Parsing through 2000-2009 data; 
 
 
-Inserting 9 rows below every new county
+# Inserting 9 rows below every new county
 Sub InsertNineRowsAndFillAE()
     Const START_ROW As Long = 2     ' first data row (header in row 1)
     Const COUNTY_COL As Long = 5    ' column E
@@ -42,7 +42,7 @@ End Sub
 
 
 
-Transposing horizontal to vertical 
+# Transposing horizontal to vertical 
 Sub UnpivotPopHorizToVertical()
     Const START_ROW As Long = 2        ' first base row
     Const BLOCK_SIZE As Long = 10      ' base row + 9 inserted rows
@@ -97,8 +97,7 @@ End Sub
 
 
 
-Getting rid of every column where row 2 has “Margin of Error” in it 
-
+# Getting rid of every column where row 2 has “Margin of Error” in it 
 Sub DeleteMOEColumns()
     Dim col As Long
     Dim lastCol As Long
