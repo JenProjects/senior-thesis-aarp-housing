@@ -1,0 +1,113 @@
+Parsing through 2000-2009 data; 
+
+
+Inserting 9 rows below every new county
+Sub InsertNineRowsAndFillAE()
+    Const START_ROW As Long = 2     ' first data row (header in row 1)
+    Const COUNTY_COL As Long = 5    ' column E
+    Const NUM_ROWS As Long = 9      ' rows to add under each county
+    
+    Dim ws As Worksheet
+    Dim lastRow As Long, r As Long, c As Long
+    
+    Set ws = ActiveSheet
+    
+    Application.ScreenUpdating = False
+    Application.Calculation = xlCalculationManual
+    
+    ' last used row based on column E
+    lastRow = ws.Cells(ws.Rows.Count, COUNTY_COL).End(xlUp).Row
+    
+    ' loop upward so inserted rows don’t shift future targets
+    For r = lastRow To START_ROW Step -1
+        If Len(Trim(ws.Cells(r, COUNTY_COL).Value)) > 0 Then
+            ' insert 9 rows below the county row
+            ws.Rows((r + 1) & ":" & (r + NUM_ROWS)).Insert Shift:=xlDown
+            
+            ' fill values from columns A:E into the 9 new rows
+            For c = 1 To 5
+                ws.Cells(r + 1, c).Resize(NUM_ROWS, 1).Value = ws.Cells(r, c).Value
+            Next c
+            
+            ' optional: copy the formatting of the county row to the 9 rows
+            ws.Rows(r).Copy
+            ws.Rows(r + 1).Resize(NUM_ROWS).PasteSpecial Paste:=xlPasteFormats
+            Application.CutCopyMode = False
+        End If
+    Next r
+    
+    Application.Calculation = xlCalculationAutomatic
+    Application.ScreenUpdating = True
+End Sub
+
+
+
+Transposing horizontal to vertical 
+Sub UnpivotPopHorizToVertical()
+    Const START_ROW As Long = 2        ' first base row
+    Const BLOCK_SIZE As Long = 10      ' base row + 9 inserted rows
+    Const YEAR_START As Long = 2000
+    Const SRC_FIRST_COL As Long = 8    ' H = 8 (2000)
+    Const SRC_LAST_COL As Long = 17    ' Q = 17 (2009)
+    Const DEST_COL As Long = 8         ' write vertically into column H
+    Const YEAR_COL As Long = 7         ' put year labels in column G
+    Const CLEAR_HORIZONTAL As Boolean = True ' clear only I:Q on base row
+
+    Dim ws As Worksheet
+    Dim lastRow As Long, r As Long, i As Long
+    Dim numYears As Long
+    Dim arr As Variant
+    
+    Set ws = ActiveSheet
+    numYears = SRC_LAST_COL - SRC_FIRST_COL + 1 ' should be 10
+
+    Application.ScreenUpdating = False
+    Application.Calculation = xlCalculationManual
+
+    ' Find last data row by county column (E)
+    lastRow = ws.Cells(ws.Rows.Count, 5).End(xlUp).Row
+
+    ' Walk base rows: 2, 12, 22, ...
+    For r = START_ROW To lastRow Step BLOCK_SIZE
+        If r + BLOCK_SIZE - 1 > lastRow Then Exit For
+
+        ' Read horizontal values 2000..2009 from H:Q on the base row
+        arr = ws.Cells(r, SRC_FIRST_COL).Resize(1, numYears).Value
+
+        ' Write vertically into H (r..r+9) and years into G
+        For i = 0 To numYears - 1
+            ws.Cells(r + i, DEST_COL).Value = arr(1, i + 1)
+            ws.Cells(r + i, YEAR_COL).Value = YEAR_START + i
+        Next i
+
+        ' Optional: copy the H formatting down the block
+        ws.Cells(r, DEST_COL).Copy
+        ws.Cells(r, DEST_COL).Resize(BLOCK_SIZE, 1).PasteSpecial Paste:=xlPasteFormats
+        Application.CutCopyMode = False
+
+        ' Clear ONLY the leftover horizontal values on the base row: I:Q (not H)
+        If CLEAR_HORIZONTAL Then
+            ws.Cells(r, SRC_FIRST_COL + 1).Resize(1, numYears - 1).ClearContents
+        End If
+    Next r
+
+    Application.Calculation = xlCalculationAutomatic
+    Application.ScreenUpdating = True
+End Sub
+
+
+
+Getting rid of every column where row 2 has “Margin of Error” in it 
+
+Sub DeleteMOEColumns()
+    Dim col As Long
+    Dim lastCol As Long
+    
+    lastCol = Cells(2, Columns.Count).End(xlToLeft).Column
+    
+    For col = lastCol To 1 Step -1
+        If InStr(1, Cells(2, col).Value, "Margin of Error", vbTextCompare) > 0 Then
+            Columns(col).Delete
+        End If
+    Next col
+End Sub
